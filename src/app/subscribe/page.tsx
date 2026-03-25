@@ -1,25 +1,22 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function Subscribe() {
+function SubscribePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Subscription plans
   const plans = [
     { name: "Basic", price: "₹199/month", benefits: ["Access to local events"] },
     { name: "Premium", price: "₹499/month", benefits: ["All events", "Priority booking"] },
     { name: "VIP", price: "₹999/month", benefits: ["Exclusive events", "Donation tracking"] },
   ];
 
-  // State
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [subscribedEmails, setSubscribedEmails] = useState<string[]>([]);
   const [selectedPlan, setSelectedPlan] = useState("");
 
-  // Pre-select plan from query parameter (from events page)
   useEffect(() => {
     const planFromURL = searchParams.get("plan");
     if (planFromURL) {
@@ -27,7 +24,6 @@ export default function Subscribe() {
     }
   }, [searchParams]);
 
-  // Handle subscription
   const handleSubscribe = () => {
     if (!email) {
       setMessage("Please enter an email");
@@ -42,13 +38,8 @@ export default function Subscribe() {
       return;
     }
 
-    // Add email to subscribed list
     setSubscribedEmails([...subscribedEmails, email]);
-
-    // Redirect to thank-you page with query params
     router.push(`/thank-you?email=${email}&plan=${selectedPlan}`);
-
-    // Reset form
     setEmail("");
     setSelectedPlan("");
   };
@@ -59,7 +50,6 @@ export default function Subscribe() {
         Subscription Plans
       </h1>
 
-      {/* Email Input */}
       <div className="flex flex-col items-center mb-8">
         <input
           type="email"
@@ -77,7 +67,6 @@ export default function Subscribe() {
         {message && <p className="mt-2 text-red-600">{message}</p>}
       </div>
 
-      {/* Subscription Plans */}
       <div className="flex justify-center gap-8 flex-wrap">
         {plans.map((plan, idx) => (
           <div
@@ -98,5 +87,13 @@ export default function Subscribe() {
         ))}
       </div>
     </main>
+  );
+}
+
+export default function Subscribe() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SubscribePage />
+    </Suspense>
   );
 }
